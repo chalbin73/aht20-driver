@@ -353,7 +353,7 @@ where
     ///                Yes
     /// ```
     pub fn init(
-        &mut self,
+        mut self,
         delay: &mut impl DelayNs,
     ) -> Result<AHT20Initialized<I>, Error<I::Error>> {
         delay.delay_ms(40);
@@ -425,14 +425,14 @@ where
 /// AHT20Initialized is returned by AHT20::init() and the sensor is ready to read from.
 ///
 /// In this state you can trigger a measurement with `.measure(&mut delay)`.
-pub struct AHT20Initialized<'a, I>
+pub struct AHT20Initialized<I>
 where
     I: I2c,
 {
-    aht20: &'a mut AHT20<I>,
+    aht20: AHT20<I>,
 }
 
-impl<'a, I> AHT20Initialized<'a, I>
+impl<I> AHT20Initialized<I>
 where
     I: I2c,
 {
@@ -623,7 +623,7 @@ where
     }
 
     /// Destroys this initialized driver and lets you release the I2C bus `I`
-    pub fn destroy(self) -> &'a mut AHT20<I> {
+    pub fn destroy(self) -> AHT20<I> {
         self.aht20
     }
 }
@@ -665,7 +665,10 @@ fn compute_crc(bytes: &[u8]) -> u8 {
 
 #[cfg(test)]
 mod tests {
-    use super::{AHT20Initialized, Error, AHT20, SENSOR_ADDRESS};
+    use super::AHT20Initialized;
+    use super::Error;
+    use super::AHT20;
+    use super::SENSOR_ADDRESS;
     use embedded_hal_mock::eh1::delay::NoopDelay as MockDelay;
     use embedded_hal_mock::eh1::i2c::Mock as I2cMock;
     use embedded_hal_mock::eh1::i2c::Transaction;
